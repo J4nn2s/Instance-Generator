@@ -1,0 +1,13 @@
+name: Generator
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.11.9
+  - matplotlib
+  - loguru
+  - pip
+  - pip:
+    - customtkinter
+    - mypy
