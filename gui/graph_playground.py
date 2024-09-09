@@ -1,9 +1,8 @@
 import tkinter as tk
+from tkinter import filedialog
 import customtkinter as ctk
 import json
-from datetime import timedelta
 import os
-from tkinter import filedialog
 
 
 class GraphPlayground(ctk.CTkFrame):
@@ -96,8 +95,8 @@ class GraphPlayground(ctk.CTkFrame):
                 start_node, end_node, _ = line
                 start_x, start_y = self.nodes[start_node]
                 end_x, end_y = self.nodes[end_node]
-                dx = event.x - self.offset_x - start_x
-                dy = event.y - self.offset_y - start_y
+                dx = event.x - (start_x + end_x) // 2
+                dy = event.y - (start_y + end_y) // 2
                 self.canvas.move(start_node, dx, dy)
                 self.canvas.move(end_node, dx, dy)
                 self.canvas.move(self.selected_item, dx, dy)
@@ -112,8 +111,8 @@ class GraphPlayground(ctk.CTkFrame):
         self.lines = []
         self.nodes = {}
 
-    def save_coordinates(self) -> None:
-        file_path = os.path.join("Data\Coordinates", "coordinates.json")
+    def save_coordinates(self):
+        file_path = os.path.join("Data", "Coordinates", "coordinates.json")
         data = {
             "nodes": {str(node): pos for node, pos in self.nodes.items()},
             "lines": [
@@ -121,7 +120,7 @@ class GraphPlayground(ctk.CTkFrame):
             ],
         }
         with open(file_path, "w") as f:
-            json.dump(data, f, indent=1)
+            json.dump(data, f, indent=2)
 
     def load_coordinates(self):
         self.clear_playground()
@@ -135,29 +134,34 @@ class GraphPlayground(ctk.CTkFrame):
             with open(file_path, "r") as f:
                 data = json.load(f)
             node_map = {}
-            for node_str, pos in data["nodes"].items():
-                x, y = pos
-                node = self.canvas.create_oval(
-                    x - 10, y - 10, x + 10, y + 10, fill=self.colors[self.color_index]
-                )
-                self.nodes[node] = (x, y)
-                node_map[node_str] = node
+            for bus_line in data["lines"]:
+                # Wählen Sie eine Farbe für die gesamte Buslinie
+                color = self.colors[self.color_index]
                 self.color_index = (self.color_index + 1) % len(self.colors)
-            for start_str, end_str, line_str in data["lines"]:
-                start_node = node_map[start_str]
-                end_node = node_map[end_str]
-                start_pos = self.nodes[start_node]
-                end_pos = self.nodes[end_node]
-                line = self.canvas.create_line(
-                    start_pos[0],
-                    start_pos[1],
-                    end_pos[0],
-                    end_pos[1],
-                    fill=self.colors[self.color_index],
-                    width=5,
-                )
-                self.lines.append((start_node, end_node, line))
-                self.color_index = (self.color_index + 1) % len(self.colors)
+
+                for node_str, pos in bus_line["nodes"].items():
+                    x, y = pos
+                    if node_str not in node_map:
+                        node = self.canvas.create_oval(
+                            x - 10, y - 10, x + 10, y + 10, fill=color
+                        )
+                        self.nodes[node] = (x, y)
+                        node_map[node_str] = node
+
+                for start_str, end_str in bus_line["edges"]:
+                    start_node = node_map[start_str]
+                    end_node = node_map[end_str]
+                    start_pos = self.nodes[start_node]
+                    end_pos = self.nodes[end_node]
+                    line = self.canvas.create_line(
+                        start_pos[0],
+                        start_pos[1],
+                        end_pos[0],
+                        end_pos[1],
+                        fill=color,
+                        width=5,
+                    )
+                    self.lines.append((start_node, end_node, line))
 
     def mainloop(self):
         super().mainloop()

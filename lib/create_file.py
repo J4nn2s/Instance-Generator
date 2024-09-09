@@ -5,6 +5,7 @@ import warnings
 import random
 from lib.edge import Edge
 
+
 class CreateFile:
     def __init__(
         self,
@@ -24,9 +25,8 @@ class CreateFile:
         self.convert_time_to_second()
 
     def create_text_file(self) -> None:
-        current_folder = os.getcwd()
-        folderName = "textFiles"
-        folderPath = os.path.join(current_folder, folderName)
+        folderName = "Instances"
+        folderPath = os.path.join("Data", folderName)
 
         if not os.path.exists(folderPath):
             warnings.warn("Could not find directory to save files")
@@ -169,7 +169,9 @@ class CreateFile:
                 else:
                     file.write(f"{j};{i};{self.timeStart};{self.timeEnd};1;NULL;NULL\n")
 
-    def transform_bus_data(self, bus_data: dict[int, int]) -> dict[int, list[int] | str]:
+    def transform_bus_data(
+        self, bus_data: dict[int, int]
+    ) -> dict[int, list[int] | str]:
         next_number = 1
         new_bus_data: dict[int, list[int] | str] = {}
         for key, value in bus_data.items():
@@ -243,7 +245,6 @@ class CreateFile:
 
         self.timeStart = str(start_hours * 3600 + start_minutes * 60)
         self.timeEnd = str(end_hours * 3600 + end_minutes * 60)
-
 
     @staticmethod
     def calculate_distance(key1: int, key2: int) -> int:

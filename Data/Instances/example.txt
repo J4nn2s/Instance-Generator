@@ -26,16 +26,16 @@ $PATTERN:ID;PatternNo;LineId;DirectionNo;TotalDistance
 * Fahrzeitarten und Bedienzeiten
 \*
 $PATTERN_OPERATING_HOURS:ID;TimeDemandTypeCode;TimeStart;TimeEnd
-0;"Allday";-3600;90000
-1;"Allday";-3600;90000
+0;"Allday";28800;64800
+1;"Allday";28800;64800
 *
 * Routenverlauf und Fahrzeiten
 \*
 $PATTERN_DRIVING_TIMES:ID;PatternId;StopIndex;PatternOperatingHoursId;StopId;DrivingTime;PointId
-0;0;0;0;1;300;1
-1;0;1;0;2;900;2
-2;1;0;1;3;300;3
-3;1;1;1;4;500;4
+0;0;0;0;1;600;1
+1;0;1;0;2;400;2
+2;1;0;1;3;900;3
+3;1;1;1;4;700;4
 *
 * Messpunkte
 *
@@ -46,12 +46,12 @@ $TRACKING_GATE:ID;FromStopId;ToStopId
 * Messpunkte - Bedienzeiten
 *
 $TRACKING_GATE_OPERATINGHOUR:ID;TrackingGateId;TimeStart;TimeEnd;PassengersPerHour;MinHeadway;MaxHeadway
-0;0;-3600;90000;1;NULL;600
-1;0;-3600;90000;100;300;780
-2;0;-3600;90000;1;NULL;NULL
-0;1;-3600;90000;1;NULL;600
-1;1;-3600;90000;100;300;780
-2;1;-3600;90000;1;NULL;NULL
+0;0;28800;64800;1;NULL;600
+1;0;28800;64800;100;300;780
+2;0;28800;64800;1;NULL;NULL
+0;1;28800;64800;1;NULL;600
+1;1;28800;64800;100;300;780
+2;1;28800;64800;1;NULL;NULL
 *
 * Transfers
 *
