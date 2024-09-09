@@ -1,6 +1,7 @@
 # Timetable-Instances
 
 1. Build and activate conda environment:
+   
 conda env create -f environment.yml
 
 2. Activate environment:
