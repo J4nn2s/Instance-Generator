@@ -1,19 +1,22 @@
 # Timetable-Instances
 
 1. Build and activate conda environment:
-conda env create -f environment.yml
+   
+	conda env create -f environment.yml
 
 2. Activate environment:
 
-conda activate Generator
+	conda activate Generator
 
 3. Install customtkinter with pip:
-
-pip install customtkinter
+	
+	pip install customtkinter
 
 4. Run project:
 
-python main.py
+	python main.py
+	
+
 
 
 
