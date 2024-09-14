@@ -7,13 +7,14 @@ from loguru import logger
 
 
 class GraphPlayground(ctk.CTkFrame):
-    def __init__(self, master=None):
+    def __init__(self, master, sidebar):
         super().__init__(master)
+        self.sidebar = sidebar
         self.master = master
         self.pack(expand=True, fill=tk.BOTH)
         self.create_widgets()
         self.lines: list[list[str]] = []
-        self.nodes = {}
+        self.nodes: dict[str, tuple[str, str]] = {}
 
         #### special to separate library grafics from bus / line data
         self.lines_to_save: list[list[str]] = []
@@ -39,6 +40,11 @@ class GraphPlayground(ctk.CTkFrame):
             self.control_frame, text="Clear Playground", command=self.clear_playground
         )
         self.clear_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.use_button = ctk.CTkButton(
+            self.control_frame, text="Use this Data", command=self.integrate_in_sidebar
+        )
+        self.use_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         self.save_button = ctk.CTkButton(
             self.control_frame, text="Save Coordinates", command=self.save_coordinates
@@ -184,6 +190,12 @@ class GraphPlayground(ctk.CTkFrame):
                 self.lines.append((start_node, end_node, line))
                 self.lines_to_save.append((int(start_str), int(end_str), line_id))
                 self.color_index = (self.color_index + 1) % len(self.colors)
+
+    def integrate_in_sidebar(self) -> None:
+        num_lines = len(self.lines_to_save)
+        # Aktualisieren Sie das Label in der Sidebar mit der Anzahl der Linien
+        self.sidebar.number_bus_entry.delete(0, tk.END)
+        self.sidebar.number_bus_entry.insert(0, str(num_lines))
 
     def mainloop(self):
         super().mainloop()

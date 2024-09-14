@@ -29,7 +29,9 @@ class MainWindow(customtkinter.CTk):
         self.graph_playground_frame = tk.Frame(self.cancas_frame)
         self.graph_playground_frame.pack(fill="both", expand=True)
 
-        self.graph_playground = GraphPlayground(master=self.graph_playground_frame)
+        self.graph_playground = GraphPlayground(
+            master=self.graph_playground_frame, sidebar=self.sidebar
+        )
         self.graph_playground.pack(fill="both", expand=True)
 
         self.button_functions = ButtonFunctions(self)
@@ -38,10 +40,13 @@ class MainWindow(customtkinter.CTk):
         # Create File Button
         ##############################
         self.create_instance_button = customtkinter.CTkButton(
-            self, text="Generate instance", corner_radius=0, command=self.button_functions.create_file
+            self,
+            text="Generate instance",
+            corner_radius=0,
+            command=self.button_functions.create_file,
         )
         self.create_instance_button.grid(row=0, column=2, sticky="ne", padx=20, pady=20)
-        
+
 
 if __name__ == "__main__":
     app = MainWindow()
