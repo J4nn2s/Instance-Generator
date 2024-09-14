@@ -3,6 +3,7 @@ from tkinter import filedialog
 import customtkinter as ctk
 import json
 import os
+from loguru import logger
 
 
 class GraphPlayground(ctk.CTkFrame):
@@ -11,12 +12,16 @@ class GraphPlayground(ctk.CTkFrame):
         self.master = master
         self.pack(expand=True, fill=tk.BOTH)
         self.create_widgets()
+        self.lines: list[list[str]] = []
+        self.nodes = {}
+
+        #### special to separate library grafics from bus / line data
+        self.lines_to_save: list[list[str]] = []
+        self.nodes_to_save: dict[str, tuple[str, str]] = {}
 
     def create_widgets(self):
         self.canvas = ctk.CTkCanvas(self, width=800, height=600, bg="#34495E")
         self.canvas.pack(expand=True, fill=tk.BOTH)
-        self.lines = []
-        self.nodes = {}
         self.selected_item = None
         self.offset_x = 0
         self.offset_y = 0
@@ -65,6 +70,9 @@ class GraphPlayground(ctk.CTkFrame):
         color = self.colors[self.color_index]
         x, y = event.x, event.y
 
+        start_node_id = len(self.nodes_to_save) + 1
+        end_node_id = len(self.nodes_to_save) + 2
+
         start_node = self.canvas.create_oval(x - 10, y - 10, x + 10, y + 10, fill=color)
         end_node = self.canvas.create_oval(
             x + 400 - 10, y - 10, x + 400 + 10, y + 10, fill=color
@@ -74,6 +82,13 @@ class GraphPlayground(ctk.CTkFrame):
         self.lines.append((start_node, end_node, line))
         self.nodes[start_node] = (x, y)
         self.nodes[end_node] = (x + 400, y)
+
+        #### TO SAVE AND LOAD #### STRICTLY separate from GUI library // customtkinter-objects
+        self.lines_to_save.append(
+            (start_node_id, end_node_id, len(self.lines_to_save) + 1)
+        )
+        self.nodes_to_save[start_node_id] = (x, y)
+        self.nodes_to_save[end_node_id] = (x + 400, y)
 
         self.color_index = (self.color_index + 1) % len(self.colors)
 
@@ -110,17 +125,25 @@ class GraphPlayground(ctk.CTkFrame):
         self.canvas.delete("all")
         self.lines = []
         self.nodes = {}
+        self.nodes_to_save = {}
+        self.lines_to_save = []
 
     def save_coordinates(self):
         file_path = os.path.join("Data", "Coordinates", "coordinates.json")
         data = {
-            "nodes": {str(node): pos for node, pos in self.nodes.items()},
+            "nodes": {
+                str(i + 1): pos
+                for i, (node_id, pos) in enumerate(self.nodes_to_save.items())
+            },
             "lines": [
-                (str(start), str(end), str(line)) for start, end, line in self.lines
+                [str(start), str(end), str(line_id)]
+                for start, end, line_id in self.lines_to_save
             ],
         }
         with open(file_path, "w") as f:
             json.dump(data, f, indent=2)
+        logger.info(f"Lines Data Structure: {self.lines_to_save}")
+        logger.info(f"Nodes Data Structure: {self.nodes_to_save}")
 
     def load_coordinates(self):
         self.clear_playground()
@@ -133,35 +156,34 @@ class GraphPlayground(ctk.CTkFrame):
         if file_path:
             with open(file_path, "r") as f:
                 data = json.load(f)
+
             node_map = {}
-            for bus_line in data["lines"]:
-                # Wählen Sie eine Farbe für die gesamte Buslinie
-                color = self.colors[self.color_index]
+            for node_str, pos in data["nodes"].items():
+                x, y = pos
+                node = self.canvas.create_oval(
+                    x - 10, y - 10, x + 10, y + 10, fill=self.colors[self.color_index]
+                )
+                node_id = int(node_str)
+                self.nodes[node_id] = (x, y)
+                node_map[node_str] = node
                 self.color_index = (self.color_index + 1) % len(self.colors)
 
-                for node_str, pos in bus_line["nodes"].items():
-                    x, y = pos
-                    if node_str not in node_map:
-                        node = self.canvas.create_oval(
-                            x - 10, y - 10, x + 10, y + 10, fill=color
-                        )
-                        self.nodes[node] = (x, y)
-                        node_map[node_str] = node
-
-                for start_str, end_str in bus_line["edges"]:
-                    start_node = node_map[start_str]
-                    end_node = node_map[end_str]
-                    start_pos = self.nodes[start_node]
-                    end_pos = self.nodes[end_node]
-                    line = self.canvas.create_line(
-                        start_pos[0],
-                        start_pos[1],
-                        end_pos[0],
-                        end_pos[1],
-                        fill=color,
-                        width=5,
-                    )
-                    self.lines.append((start_node, end_node, line))
+            for start_str, end_str, line_id in data["lines"]:
+                start_node = node_map[start_str]
+                end_node = node_map[end_str]
+                start_pos = self.nodes[int(start_str)]
+                end_pos = self.nodes[int(end_str)]
+                line = self.canvas.create_line(
+                    start_pos[0],
+                    start_pos[1],
+                    end_pos[0],
+                    end_pos[1],
+                    fill=self.colors[self.color_index],
+                    width=5,
+                )
+                self.lines.append((start_node, end_node, line))
+                self.lines_to_save.append((int(start_str), int(end_str), line_id))
+                self.color_index = (self.color_index + 1) % len(self.colors)
 
     def mainloop(self):
         super().mainloop()

@@ -32,10 +32,10 @@ $PATTERN_OPERATING_HOURS:ID;TimeDemandTypeCode;TimeStart;TimeEnd
 * Routenverlauf und Fahrzeiten
 \*
 $PATTERN_DRIVING_TIMES:ID;PatternId;StopIndex;PatternOperatingHoursId;StopId;DrivingTime;PointId
-0;0;0;0;1;600;1
-1;0;1;0;2;400;2
-2;1;0;1;3;900;3
-3;1;1;1;4;700;4
+0;0;0;0;1;700;1
+1;0;1;0;2;900;2
+2;1;0;1;3;500;3
+3;1;1;1;4;900;4
 *
 * Messpunkte
 *
